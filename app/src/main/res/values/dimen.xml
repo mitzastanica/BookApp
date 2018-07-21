@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name = "activity_margin">16dp</dimen>
+    <dimen name="widget_margin">16dp</dimen>
+    <dimen name="standard_size">16sp</dimen>
+    <dimen name="quarter_margin">4dp</dimen>
+    <dimen name="spinner_dimension">48dp</dimen>
+   
+</resources>
