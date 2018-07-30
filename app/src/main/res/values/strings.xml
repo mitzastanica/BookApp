@@ -4,18 +4,6 @@
     <string name="product_name">Book Name</string>
     <string name="quantity">Quantity</string>
 
-    <string name="quantity_0">Select</string>
-    <string name="quantity_1">1</string>
-    <string name="quantity_2">2</string>
-    <string name="quantity_3">3</string>
-    <string name="quantity_4">4</string>
-    <string name="quantity_5">5</string>
-    <string name="quantity_6">6</string>
-    <string name="quantity_7">7</string>
-    <string name="quantity_8">8</string>
-    <string name="quantity_9">9</string>
-    <string name="quantity_10">10</string>
-
     <string name="category_price">Unit Price</string>
     <string name="supplier_name">Supplier Name</string>
     <string name="supplier_phone">Supplier Phone</string>
@@ -30,4 +18,25 @@
 
     <string name="action_insert_new_book">Insert New Book</string>
     <string name="action_delete_all_entries">Delete All Books</string>
+
+    <string name="empty_view_title_text">Your book store is empty...</string>
+    <string name="empty_view_subtitle_text">Get started by adding a book!</string>
+
+    <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
+    <!-- Dialog button text for the option to discard a user's changes [CHAR LIMIT=20] -->
+    <string name="discard">Discard</string>
+    <!-- Dialog button text for the option to keep editing the current pet [CHAR LIMIT=20] -->
+    <string name="keep_editing">Keep Editing</string>
+
+    <!-- Dialog message to ask the user to confirm deleting the current pet [CHAR LIMIT=NONE] -->
+    <string name="delete_dialog_msg">Delete this book?</string>
+    <!-- Dialog button text for the option to confirm deleting the current pet [CHAR LIMIT=20] -->
+    <string name="delete">Delete</string>
+    <!-- Dialog button text for the option to cancel deletion of the current pet [CHAR LIMIT=20] -->
+    <string name="cancel">Cancel</string>
+
+    <!-- Toast message in editor when current pet was successfully deleted [CHAR LIMIT=NONE] -->
+    <string name="editor_delete_book_successful">Book deleted</string>
+    <!-- Toast message in editor when current pet has failed to be deleted [CHAR LIMIT=NONE] -->
+    <string name="editor_delete_book_failed">Error with deleting book</string>
 </resources>

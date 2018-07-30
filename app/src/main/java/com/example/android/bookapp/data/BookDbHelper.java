@@ -22,11 +22,11 @@ public class BookDbHelper extends SQLiteOpenHelper {
 
         String SQL_CREATE_PRODUCT_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
                 + com.example.android.bookapp.data.BookContract.BookEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + com.example.android.bookapp.data.BookContract.BookEntry.COLUMN_PRODUCT_NAME + " TEXT, "
-                + com.example.android.bookapp.data.BookContract.BookEntry.COLUMN_PRODUCT_QUANTITY + " INTEGER, "
+                + com.example.android.bookapp.data.BookContract.BookEntry.COLUMN_PRODUCT_NAME + " TEXT NOT NULL, "
+                + com.example.android.bookapp.data.BookContract.BookEntry.COLUMN_PRODUCT_QUANTITY + " INTEGER NOT NULL, "
                 + com.example.android.bookapp.data.BookContract.BookEntry.COLUMN_PRODUCT_PRICE + " REAL NOT NULL, "
                 + com.example.android.bookapp.data.BookContract.BookEntry.COLUMN_SUPPLIER_NAME + " TEXT NOT NULL, "
-                + com.example.android.bookapp.data.BookContract.BookEntry.COLUMN_SUPPLIER_PHONE + " INTEGER);";
+                + com.example.android.bookapp.data.BookContract.BookEntry.COLUMN_SUPPLIER_PHONE + " INTEGER NOT NULL);";
 
         database.execSQL(SQL_CREATE_PRODUCT_TABLE);
 
@@ -34,7 +34,10 @@ public class BookDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        // Drop the Database
+        db.execSQL("DROP TABLE IF EXISTS " + BookContract.BookEntry.TABLE_NAME);
+        // Create a new one
+        onCreate(db);
     }
 
 

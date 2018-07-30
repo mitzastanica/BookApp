@@ -43,22 +43,46 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                style="@style/CategoryStyle"
-                android:text="@string/quantity" />
+
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-                <Spinner
-                    android:id="@+id/spinner_quantity"
+                <!-- Label -->
+                <TextView
+                    style="@style/CategoryStyle"
+                    android:text="@string/quantity" />
+
+                <Button
+                    android:id="@+id/decreaseButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginLeft="60dp"
+                    android:onClick="decrement"
+                    android:text="-"
+                    android:textSize="25sp" />
+
+                <!-- Quantity field -->
+                <EditText
+                    android:id="@+id/edit_quantity"
+                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:layout_height="@dimen/spinner_dimension"
-                    android:paddingRight="@dimen/activity_margin"
-                    android:spinnerMode="dropdown" />
+                    android:gravity="center"
+                    android:inputType="number"
+                    android:text="1"
+                    android:textSize="25sp"
+                    android:layout_marginRight="30dp"
+                    android:layout_marginLeft="30dp"/>
+
+                <Button
+                    android:id="@+id/increaseButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:onClick="increment"
+                    android:text="+"
+                    android:textSize="25sp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -78,7 +102,7 @@
                 android:paddingLeft="@dimen/quarter_margin">
 
                 <EditText
-                    android:id="@+id/edit_pet_weight"
+                    android:id="@+id/edit_book_price"
                     style="@style/EditorFieldStyle"
                     android:hint="@string/hint_product_price"
                     android:inputType="numberDecimal" />
@@ -126,7 +150,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:paddingLeft="@dimen/quarter_margin">
+                android:paddingLeft="22dp">
 
                 <EditText
                     android:id="@+id/edit_supplier_phone"
@@ -134,7 +158,14 @@
                     android:hint="@string/hint_supplier_phone"
                     android:inputType="phone" />
 
+
             </LinearLayout>
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/call_phone_supplier"
+                android:onClick="orderProductFromSupplier"
+                android:id="@+id/phone_button"/>
         </LinearLayout>
 
     </LinearLayout>

@@ -48,4 +48,12 @@
         <item name="android:textSize">@dimen/standard_size</item>
     </style>
 
+    <!-- Style for an EditText field in the editor -->
+    <style name="EditorQuantityStyle">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">2</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
 </resources>
