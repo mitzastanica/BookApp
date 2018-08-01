@@ -19,12 +19,12 @@ public class BookProvider extends ContentProvider {
     public static final String LOG_TAG = BookProvider.class.getSimpleName();
 
     /**
-     * URI matcher code for the content URI for the medicines table
+     * URI matcher code for the content URI for the books table
      */
     private static final int BOOKS = 100;
 
     /**
-     * URI matcher code for the content URI for a single medicine in the medicines table
+     * URI matcher code for the content URI for a single book in the books table
      */
     private static final int BOOK_ID = 101;
 
@@ -37,13 +37,11 @@ public class BookProvider extends ContentProvider {
 
     // Static initializer. This is run the first time anything is called from this class.
     static {
-        // The content URI of the form "content://com.example.marwa.medicinesinventory/medicines/" will map to the
-        // integer code {@link #MEDICINES}. This URI is used to provide access to MULTIPLE rows
-        // of the medicines table.
+        // The calls to addURI() go here, for all of the content URI patterns that the provider
+        // should recognize. All paths added to the UriMatcher have a corresponding code to return
+        // when a match is found.
         sUriMatcher.addURI(BookContract.CONTENT_AUTHORITY, BookContract.PATH_BOOKS, BOOKS);
 
-        // In this case, the "#" wildcard is used where "#" can be substituted for an integer.
-        // For example, "content://com.example.marwa.medicinesinventory/medicines/3" matches.
         sUriMatcher.addURI(BookContract.CONTENT_AUTHORITY, BookContract.PATH_BOOKS + "/#", BOOK_ID);
     }
 
@@ -52,6 +50,9 @@ public class BookProvider extends ContentProvider {
      */
     private BookDbHelper mDbHelper;
 
+    /**
+     * Initialize the provider and the database helper object.
+     */
     @Override
     public boolean onCreate() {
         mDbHelper = new BookDbHelper(getContext());
@@ -74,14 +75,14 @@ public class BookProvider extends ContentProvider {
         int match = sUriMatcher.match(uri);
         switch (match) {
             case BOOKS:
-                // For the MEDICINES code, query the medicines table directly with the given
+                // For the BOOKS code, query the books table directly with the given
                 // projection, selection, selection arguments, and sort order. The cursor
-                // could contain multiple rows of the medicines table.
+                // could contain multiple rows of the books table.
                 cursor = database.query(BookContract.BookEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
                 break;
             case BOOK_ID:
-                // For the MEDICINE_ID code, extract out the ID from the URI.
+                // For the BOOK_ID code, extract out the ID from the URI.
                 selection = BookContract.BookEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
 
@@ -119,7 +120,7 @@ public class BookProvider extends ContentProvider {
 
 
     /**
-     * Insert a medicine into the database with the given content values. Return the new content URI
+     * Insert a BOOK into the database with the given content values. Return the new content URI
      * for that specific row in the database.
      */
     private Uri insertBook(Uri uri, ContentValues values) {
@@ -127,38 +128,38 @@ public class BookProvider extends ContentProvider {
         // Check that the name is not null
         String name = values.getAsString(BookContract.BookEntry.COLUMN_PRODUCT_NAME);
         if (name == null) {
-            throw new IllegalArgumentException("Medicine requires a name");
+            throw new IllegalArgumentException("Book requires a name");
         }
 
         // Check that the price is not null and it's greater than or equal to 0
         Double price = values.getAsDouble(BookContract.BookEntry.COLUMN_PRODUCT_PRICE);
         if (price != null && price < 0) {
-            throw new IllegalArgumentException("Medicine requires valid price");
+            throw new IllegalArgumentException("Book requires valid price");
         }
 
 
-        // If the quantity is provided, check that it's greater than or equal to 0 kg
+        // If the quantity is provided, check that it's greater than or equal to 0
         Integer quantity = values.getAsInteger(BookContract.BookEntry.COLUMN_PRODUCT_QUANTITY);
         if (quantity != null && quantity < 0) {
-            throw new IllegalArgumentException("Medicine requires valid quantity");
+            throw new IllegalArgumentException("Book requires valid quantity");
         }
 
         // Check that the name is not null
         String supplier = values.getAsString(BookContract.BookEntry.COLUMN_SUPPLIER_NAME);
         if (supplier == null) {
-            throw new IllegalArgumentException("Medicine requires a supplier");
+            throw new IllegalArgumentException("Book requires a supplier");
         }
 
         // Check that the phone is not null
         String phone = values.getAsString(BookContract.BookEntry.COLUMN_SUPPLIER_PHONE);
         if (phone == null) {
-            throw new IllegalArgumentException("Medicine requires a supplier");
+            throw new IllegalArgumentException("Book requires the phone of a supplier");
         }
 
         // Get writable database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
-        // Insert the new medicine with the given values
+        // Insert the new book with the given values
         long id = database.insert(BookContract.BookEntry.TABLE_NAME, null, values);
 
         // If the ID is -1, then the insertion failed. Log an error and return null.
@@ -167,7 +168,7 @@ public class BookProvider extends ContentProvider {
             return null;
         }
 
-        // Notify all listeners that the data has changed for the medicine content URI
+        // Notify all listeners that the data has changed for the book content URI
         getContext().getContentResolver().notifyChange(uri, null);
 
         // Once we know the ID of the new row in the table,
@@ -175,6 +176,100 @@ public class BookProvider extends ContentProvider {
         return ContentUris.withAppendedId(uri, id);
     }
 
+    /**
+     * Updates the data at the given selection and selection arguments, with the new ContentValues.
+     */
+    @Override
+    public int update(@NonNull Uri uri, ContentValues contentValues, String selection,
+                      String[] selectionArgs) {
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case BOOKS:
+                return updateBook(uri, contentValues, selection, selectionArgs);
+            case BOOK_ID:
+                // For the BOOK_ID code, extract out the ID from the URI,
+                // so we know which row to update. Selection will be "_id=?" and selection
+                // arguments will be a String array containing the actual ID.
+                selection = BookContract.BookEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return updateBook(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+        }
+    }
+
+    /**
+     * Update books in the database with the given content values. Apply the changes to the rows
+     * specified in the selection and selection arguments (which could be 0 or 1 or more books).
+     * Return the number of rows that were successfully updated.
+     */
+    private int updateBook(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        // If the {@link BookContract.BookEntry.COLUMN_PRODUCT_NAME} key is present,
+        // check that the name value is not null.
+        if (values.containsKey(BookContract.BookEntry.COLUMN_PRODUCT_NAME)) {
+            String name = values.getAsString(BookContract.BookEntry.COLUMN_PRODUCT_NAME);
+            if (name == null) {
+                throw new IllegalArgumentException("Book requires a name");
+            }
+        }
+
+        // If the {@link BookContract.BookEntry.COLUMN_PRODUCT_PRICE} key is present,
+        // check that the price value is valid.
+        if (values.containsKey(BookContract.BookEntry.COLUMN_PRODUCT_PRICE)) {
+            Double price = values.getAsDouble(BookContract.BookEntry.COLUMN_PRODUCT_PRICE);
+            if (price != null && price < 0) {
+                throw new IllegalArgumentException("Book requires a price");
+            }
+        }
+
+
+        // If the {@link BookContract.BookEntry.COLUMN_PRODUCT_QUANTITY} key is present,
+        // check that the quantity value is valid.
+        if (values.containsKey(BookContract.BookEntry.COLUMN_PRODUCT_QUANTITY)) {
+            Integer quantity = values.getAsInteger(BookContract.BookEntry.COLUMN_PRODUCT_QUANTITY);
+            if (quantity != null && quantity < 0) {
+                throw new IllegalArgumentException("Book requires valid quantity");
+            }
+        }
+
+        // If the {@link BookContract.BookEntry.COLUMN_SUPPLIER_NAME} key is present,
+        // check that the supplier name value is not null.
+        if (values.containsKey(BookContract.BookEntry.COLUMN_SUPPLIER_NAME)) {
+            String supplier = values.getAsString(BookContract.BookEntry.COLUMN_SUPPLIER_NAME);
+            if (supplier == null) {
+                throw new IllegalArgumentException("Book requires a supplier");
+            }
+        }
+
+        // If the {@link BookContract.BookEntry.COLUMN_SUPPLIER_PHONE} key is present,
+        // check that the supplier phone value is not null.
+        if (values.containsKey(BookContract.BookEntry.COLUMN_SUPPLIER_PHONE)) {
+            String phone = values.getAsString(BookContract.BookEntry.COLUMN_SUPPLIER_PHONE);
+            if (phone == null) {
+                throw new IllegalArgumentException("Phone Number is required");
+            }
+        }
+
+        // If there are no values to update, then don't try to update the database
+        if (values.size() == 0) {
+            return 0;
+        }
+
+        // Otherwise, get writable database to update the data
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        // Perform the update on the database and get the number of rows affected
+        int rowsUpdated = database.update(BookContract.BookEntry.TABLE_NAME, values, selection, selectionArgs);
+
+        // If 1 or more rows were updated, then notify all listeners that the data at the
+        // given URI has changed
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return the number of rows updated
+        return rowsUpdated;
+    }
 
     /**
      * Delete the data at the given selection and selection arguments.
@@ -211,102 +306,6 @@ public class BookProvider extends ContentProvider {
 
         // Return the number of rows deleted
         return rowsDeleted;
-    }
-
-    /**
-     * Updates the data at the given selection and selection arguments, with the new ContentValues.
-     */
-    @Override
-    public int update(@NonNull Uri uri, ContentValues contentValues, String selection,
-                      String[] selectionArgs) {
-        final int match = sUriMatcher.match(uri);
-        switch (match) {
-            case BOOKS:
-                return updateBook(uri, contentValues, selection, selectionArgs);
-            case BOOK_ID:
-                // For the MEDICINE_ID code, extract out the ID from the URI,
-                // so we know which row to update. Selection will be "_id=?" and selection
-                // arguments will be a String array containing the actual ID.
-                selection = BookContract.BookEntry._ID + "=?";
-                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return updateBook(uri, contentValues, selection, selectionArgs);
-            default:
-                throw new IllegalArgumentException("Update is not supported for " + uri);
-        }
-    }
-
-
-    /**
-     * Update medicines in the database with the given content values. Apply the changes to the rows
-     * specified in the selection and selection arguments (which could be 0 or 1 or more medicines).
-     * Return the number of rows that were successfully updated.
-     */
-    private int updateBook(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        // If the {@link MedicineEntry#COLUMN_NAME} key is present,
-        // check that the name value is not null.
-        if (values.containsKey(BookContract.BookEntry.COLUMN_PRODUCT_NAME)) {
-            String name = values.getAsString(BookContract.BookEntry.COLUMN_PRODUCT_NAME);
-            if (name == null) {
-                throw new IllegalArgumentException("Book requires a name");
-            }
-        }
-
-        // If the {@link MedicineEntry#COLUMN_COLUMN_PRICE} key is present,
-        // check that the price value is valid.
-        if (values.containsKey(BookContract.BookEntry.COLUMN_PRODUCT_PRICE)) {
-            Double price = values.getAsDouble(BookContract.BookEntry.COLUMN_PRODUCT_PRICE);
-            if (price != null && price < 0) {
-                throw new IllegalArgumentException("Book requires a price");
-            }
-        }
-
-
-        // If the {@link MedicineEntry#COLUMN_PRICE} key is present,
-        // check that the price value is valid.
-        if (values.containsKey(BookContract.BookEntry.COLUMN_PRODUCT_QUANTITY)) {
-            Integer quantity = values.getAsInteger(BookContract.BookEntry.COLUMN_PRODUCT_QUANTITY);
-            if (quantity != null && quantity < 0) {
-                throw new IllegalArgumentException("Book requires valid quantity");
-            }
-        }
-
-        // If the {@link MedicineEntry#COLUMN_SUPPLIER} key is present,
-        // check that the supplier value is not null.
-        if (values.containsKey(BookContract.BookEntry.COLUMN_SUPPLIER_NAME)) {
-            String supplier = values.getAsString(BookContract.BookEntry.COLUMN_SUPPLIER_NAME);
-            if (supplier == null) {
-                throw new IllegalArgumentException("Book requires a supplier");
-            }
-        }
-
-        // If the {@link MedicineEntry#COLUMN_SUPPLIER} key is present,
-        // check that the phone value is not null.
-        if (values.containsKey(BookContract.BookEntry.COLUMN_SUPPLIER_PHONE)) {
-            String phone = values.getAsString(BookContract.BookEntry.COLUMN_SUPPLIER_PHONE);
-            if (phone == null) {
-                throw new IllegalArgumentException("Phone Number is required");
-            }
-        }
-
-        // If there are no values to update, then don't try to update the database
-        if (values.size() == 0) {
-            return 0;
-        }
-
-        // Otherwise, get writable database to update the data
-        SQLiteDatabase database = mDbHelper.getWritableDatabase();
-
-        // Perform the update on the database and get the number of rows affected
-        int rowsUpdated = database.update(BookContract.BookEntry.TABLE_NAME, values, selection, selectionArgs);
-
-        // If 1 or more rows were updated, then notify all listeners that the data at the
-        // given URI has changed
-        if (rowsUpdated != 0) {
-            getContext().getContentResolver().notifyChange(uri, null);
-        }
-
-        // Return the number of rows updated
-        return rowsUpdated;
     }
 
 

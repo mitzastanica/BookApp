@@ -11,4 +11,5 @@
     <color name="editorColorPrimaryDark">#394450</color>
 
     <color name="lightGray">#AEB6BD</color>
+    <color name="colorText">#1A237E</color>
 </resources>

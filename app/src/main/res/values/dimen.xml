@@ -6,5 +6,17 @@
     <dimen name="standard_size">16sp</dimen>
     <dimen name="quarter_margin">4dp</dimen>
     <dimen name="spinner_dimension">48dp</dimen>
-   
+    <dimen name="text_padding_top">16dp</dimen>
+    <dimen name="text_padding_top2">8dp</dimen>
+    <dimen name="button_layout">48dp</dimen>
+    <dimen name="button_marginLeft">60dp</dimen>
+    <dimen name="button_textSize">25sp</dimen>
+    <dimen name="quantity_editText_margins">30dp</dimen>
+    <dimen name="listitem_textView_margins">10dp</dimen>
+    <dimen name="TextView_textSize">25sp</dimen>
+    <dimen name="TextView_textSize2">15sp</dimen>
+    <dimen name="listitem_textView_margins2">20dp</dimen>
+    <dimen name="button_width">60dp</dimen>
+    <dimen name="button_height">40dp</dimen>
+    <dimen name="button_margins">10dp</dimen>
 </resources>

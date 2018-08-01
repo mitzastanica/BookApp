@@ -10,10 +10,10 @@
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:textColor="#1A237E"
-        android:textSize="25sp"
+        android:layout_marginLeft="@dimen/listitem_textView_margins"
+        android:layout_marginStart="@dimen/listitem_textView_margins"
+        android:textColor="@color/colorText"
+        android:textSize="@dimen/TextView_textSize"
         tools:text="Business" />
 
     <TextView
@@ -23,10 +23,10 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="10dp"
-        android:textColor="#1A237E"
-        android:textSize="15sp"
+        android:layout_marginRight="@dimen/listitem_textView_margins2"
+        android:layout_marginTop="@dimen/listitem_textView_margins"
+        android:textColor="@color/colorText"
+        android:textSize="@dimen/TextView_textSize2"
         tools:text="1" />
 
 
@@ -37,21 +37,21 @@
         android:layout_alignLeft="@+id/name"
         android:layout_alignStart="@+id/name"
         android:layout_below="@+id/name"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="@dimen/listitem_textView_margins2"
         android:textColor="@color/lightGray"
-        android:textSize="15sp"
+        android:textSize="@dimen/TextView_textSize2"
         tools:text="10.00" />
 
     <Button
-        android:id="@+id/sell_button"
-        android:layout_width="60dp"
-        android:layout_height="40dp"
+        android:id="@+id/sale_button"
+        android:layout_width="@dimen/button_width"
+        android:layout_height="@dimen/button_height"
         android:layout_alignBaseline="@+id/price"
         android:layout_alignBottom="@+id/price"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginEnd="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginEnd="@dimen/button_margins"
+        android:layout_marginRight="@dimen/button_margins"
         android:text="SALE"
         android:textColor="@color/colorPrimary"
         android:textStyle="bold|italic" />

@@ -4,8 +4,6 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -21,17 +19,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Spinner;
 import android.widget.Toast;
-
-import com.example.android.bookapp.data.BookContract;
 import com.example.android.bookapp.data.BookContract.BookEntry;
-import com.example.android.bookapp.data.BookDbHelper;
+
 
 /**
  * Allows user to create a new book or edit an existing one.
@@ -62,12 +55,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     String supplier_phone;
 
-    /** Boolean flag that keeps track of whether the pet has been edited (true) or not (false) */
+    /** Boolean flag that keeps track of whether the book has been edited (true) or not (false) */
     private boolean mBookHasChanged = false;
 
     /**
      * OnTouchListener that listens for any user touches on a View, implying that they are modifying
-     * the view, and we change the mPetHasChanged boolean to true.
+     * the view, and we change the mBookHasChanged boolean to true.
      */
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
         @Override
@@ -83,29 +76,23 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         setContentView(R.layout.activity_editor);
 
         // Examine the intent that was used to launch this activity,
-        // in order to figure out if we're creating a new medicine or editing an existing one.
+        // in order to figure out if we're creating a new book or editing an existing one.
         Intent intent = getIntent();
         mCurrentBookUri = intent.getData();
 
-        // If the intent DOES NOT contain a medicine content URI, then we know that we are
-        // creating a new medicine.
+        // If the intent does not contain a book content URI, then we are
+        // creating a new book.
         if (mCurrentBookUri == null) {
-            // This is a new medicine, so change the app bar to say "Add a Medicine"
-            // I know we are coming from the FAB button being pressed
+            // This is a new book, so change the app bar to say "Add a Book"
             setTitle("Add a Book");
 
-            // Hide the Order Button if the medicine is going to be added and not stored yet.
-            //phone.setVisibility(View.GONE);
-
             // Invalidate the options menu, so the "Delete" menu option can be hidden.
-            // (It doesn't make sense to delete a medicine that hasn't been created yet.)
             invalidateOptionsMenu();
         } else {
-            // Otherwise this is an existing medicine, so change app bar to say "Edit Medicine"
-            // I know we are coming from clicking a medicine in the Main Activity.
+            // Otherwise this is an existing book, so change app bar to say "Edit Book"
             setTitle("Edit a Book");
 
-            // Initialize a loader to read the medicine data from the database
+            // Initialize a loader to read the book data from the database
             // and display the current values in the detail Activity
             getSupportLoaderManager().initLoader(EXISTING_BOOK_LOADER, null, this);
         }
@@ -116,9 +103,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText = findViewById(R.id.edit_quantity);
         mSupplierNameEditText = findViewById(R.id.edit_supplier_name);
         mSupplierPhoneEditText = findViewById(R.id.edit_supplier_phone);
-        phone = (ImageButton) findViewById(R.id.phone_button);
-        Button increaseButton = (Button) findViewById(R.id.increaseButton);
-        Button decreaseButton = (Button) findViewById(R.id.decreaseButton);
+        phone = findViewById(R.id.phone_button);
+        Button increaseButton = findViewById(R.id.increaseButton);
+        Button decreaseButton = findViewById(R.id.decreaseButton);
 
 
         // Setup OnTouchListeners on all the input fields, so we can determine if the user
@@ -133,7 +120,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         decreaseButton.setOnTouchListener(mTouchListener);
 
     }
-
 
     /**
      * Get user input from editor and save new book into database.
@@ -168,8 +154,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         // Add Data
         if (mCurrentBookUri == null) {
-            // This is a NEW medicine, so insert a new medicine into the provider,
-            // returning the content URI for the new medicine.
+
             Uri newUri = getContentResolver().insert(BookEntry.CONTENT_URI, values);
 
             // Show a toast message depending on whether or not the insertion was successful
@@ -198,42 +183,80 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         }
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu options from the res/menu/menu_editor.xml file.
+        // This adds menu items to the app bar.
+        getMenuInflater().inflate(R.menu.menu_editor, menu);
+        return true;
+    }
 
-        /**
-         * Show a dialog that warns the user there are unsaved changes that will be lost
-         * if they continue leaving the editor.
-         *
-         * @param discardButtonClickListener is the click listener for what to do when
-         *                                   the user confirms they want to discard their changes
-         */
-        private void showUnsavedChangesDialog (
-                DialogInterface.OnClickListener discardButtonClickListener){
-            // Create an AlertDialog.Builder and set the message, and click listeners
-            // for the postivie and negative buttons on the dialog.
-            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-            builder.setMessage(R.string.unsaved_changes_dialog_msg);
-            builder.setPositiveButton(R.string.discard, discardButtonClickListener);
-            builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    // User clicked the "Keep editing" button, so dismiss the dialog
-                    // and continue editing the pet.
-                    if (dialog != null) {
-                        dialog.dismiss();
-                    }
-                }
-            });
-
-            // Create and show the AlertDialog
-            android.app.AlertDialog alertDialog = builder.create();
-            alertDialog.show();
+    /**
+     * This method is called after invalidateOptionsMenu(), so that the
+     * menu can be updated (some menu items can be hidden or made visible).
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // If this is a new book, hide the "Delete" menu item.
+        if (mCurrentBookUri == null) {
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
         }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // User clicked on a menu option in the app bar overflow menu
+        switch (item.getItemId()) {
+            // Respond to a click on the "Save" menu option
+            case R.id.action_save:
+                // Save book to database
+                saveBook();
+                // Exit activity
+                finish();
+                return true;
+            // Respond to the click on the "Delete" menu option
+            case R.id.action_delete:
+                showDeleteConfirmationDialog();
+                return true;
+            // Respond to the click on the "Up" arrow button in the app bar
+            case android.R.id.home:
+                // Navigate back to parent activity (CatalogActivity)
+                // If the book hasn't changed, continue with navigating up to parent activity
+                // which is the {@link CatalogActivity}.
+                if (!mBookHasChanged) {
+                    NavUtils.navigateUpFromSameTask(EditorActivity.this);
+                    return true;
+                }
+
+                // Otherwise if there are unsaved changes, setup a dialog to warn the user.
+                // Create a click listener to handle the user confirming that
+                // Changes should be discarded.
+                DialogInterface.OnClickListener discardButtonClickListener =
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // User clicked "Discard" button, navigate to parent activity.
+                                NavUtils.navigateUpFromSameTask(EditorActivity.this);
+                            }
+                        };
+
+                // Show a dialog that notifies the user they have unsaved changes
+                showUnsavedChangesDialog(discardButtonClickListener);
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /**
      * This method is called when the back button is pressed.
      */
     @Override
     public void onBackPressed() {
-        // If the medicine hasn't changed, continue with handling back button press
+        // If the book hasn't changed, continue with handling back button press
         if (!mBookHasChanged) {
             super.onBackPressed();
             return;
@@ -254,8 +277,38 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         showUnsavedChangesDialog(discardButtonClickListener);
     }
 
+        /**
+         * Show a dialog that warns the user there are unsaved changes that will be lost
+         * if they continue leaving the editor.
+         *
+         * @param discardButtonClickListener is the click listener for what to do when
+         *                                   the user confirms they want to discard their changes
+         */
+        private void showUnsavedChangesDialog (
+                DialogInterface.OnClickListener discardButtonClickListener){
+            // Create an AlertDialog.Builder and set the message, and click listeners
+            // for the positive and negative buttons on the dialog.
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+            builder.setMessage(R.string.unsaved_changes_dialog_msg);
+            builder.setPositiveButton(R.string.discard, discardButtonClickListener);
+            builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // User clicked the "Keep editing" button, so dismiss the dialog
+                    // and continue editing the book.
+                    if (dialog != null) {
+                        dialog.dismiss();
+                    }
+                }
+            });
+
+            // Create and show the AlertDialog
+            android.app.AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        }
+
+
     /**
-     * Prompt the user to confirm that they want to delete this medicine.
+     * Prompt the user to confirm that they want to delete this book.
      */
     private void showDeleteConfirmationDialog() {
         // Create an AlertDialog.Builder and set the message, and click listeners
@@ -264,14 +317,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         builder.setMessage(R.string.delete_dialog_msg);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Delete" button, so delete the medicine.
                 deleteBook();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Cancel" button, so dismiss the dialog
-                // and continue editing the medicine.
+                // and continue editing the book.
                 if (dialog != null) {
                     dialog.dismiss();
                 }
@@ -284,14 +336,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     /**
-     * Perform the deletion of the medicine in the database.
+     * Perform the delete action of the book in the database.
      */
     private void deleteBook() {
-        // Only perform the delete if this is an existing medicine.
+        // Only perform the delete if this is an existing book.
         if (mCurrentBookUri != null) {
-            // Call the ContentResolver to delete the medicine at the given content URI.
-            // Pass in null for the selection and selection args because the mCurrentMedicineUri
-            // content URI already identifies the medicine that we want.
+            // Call the ContentResolver to delete the book at the given content URI.
+            // Pass in null for the selection and selection args because the mCurrentBookUri
+            // content URI already identifies the book that we want.
             int rowsDeleted = getContentResolver().delete(mCurrentBookUri, null, null);
 
             // Show a toast message depending on whether or not the delete was successful.
@@ -311,79 +363,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu options from the res/menu/menu_editor.xml file.
-        // This adds menu items to the app bar.
-        getMenuInflater().inflate(R.menu.menu_editor, menu);
-        return true;
-    }
 
-    /**
-     * This method is called after invalidateOptionsMenu(), so that the
-     * menu can be updated (some menu items can be hidden or made visible).
-     */
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        // If this is a new pet, hide the "Delete" menu item.
-        if (mCurrentBookUri == null) {
-            MenuItem menuItem = menu.findItem(R.id.action_delete);
-            menuItem.setVisible(false);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // User clicked on a menu option in the app bar overflow menu
-        switch (item.getItemId()) {
-            // Respond to a click on the "Save" menu option
-            case R.id.action_save:
-                // Save pet to database
-                saveBook();
-                // Exit activity
-                finish();
-                return true;
-            // Respond to a click on the "Delete" menu option
-            case R.id.action_delete:
-                showDeleteConfirmationDialog();
-                return true;
-            // Respond to a click on the "Up" arrow button in the app bar
-            case android.R.id.home:
-                // Navigate back to parent activity (CatalogActivity)
-                // If the medicine hasn't changed, continue with navigating up to parent activity
-                // which is the {@link CatalogActivity}.
-                if (!mBookHasChanged) {
-                    NavUtils.navigateUpFromSameTask(EditorActivity.this);
-                    return true;
-                }
-
-                // Otherwise if there are unsaved changes, setup a dialog to warn the user.
-                // Create a click listener to handle the user confirming that
-                // changes should be discarded.
-                DialogInterface.OnClickListener discardButtonClickListener =
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                // User clicked "Discard" button, navigate to parent activity.
-                                NavUtils.navigateUpFromSameTask(EditorActivity.this);
-                            }
-                        };
-
-                // Show a dialog that notifies the user they have unsaved changes
-                showUnsavedChangesDialog(discardButtonClickListener);
-                return true;
-
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-        // Since the editor shows all medicine attributes, define a projection that contains
-        // all columns from the medicine table
+        // Since the editor shows all book attributes, define a projection that contains
+        // all columns from the book table
         String[] projection = {
                 BookEntry._ID,
                 BookEntry.COLUMN_PRODUCT_NAME,
@@ -394,11 +380,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(this,   // Parent activity context
-                mCurrentBookUri,         // Query the content URI for the current medicine
-                projection,             // Columns to include in the resulting Cursor
-                null,                   // No selection clause
-                null,                   // No selection arguments
-                null);                  // Default sort order
+                mCurrentBookUri,               // Query the content URI for the current medicine
+                projection,                    // Columns to include in the resulting Cursor
+                null,                  // No selection clause
+                null,               // No selection arguments
+                null);                // Default sort order
     }
 
 
@@ -412,7 +398,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // Proceed with moving to the first row of the cursor and reading data from it
         // (This should be the only row in the cursor)
         if (cursor.moveToFirst()) {
-            // Find the columns of medicine attributes that we're interested in
+            // Find the columns of book attributes that we're interested in
             int nameColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRODUCT_NAME);
             int priceColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRODUCT_PRICE);
             int quantityColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRODUCT_QUANTITY);
@@ -446,7 +432,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     /**
-     * Orders the product from suppliers using their phone numbers.
+     * Order the product from suppliers using their phone numbers.
      */
     public void orderProductFromSupplier(View view) {
         Intent intent = new Intent(Intent.ACTION_DIAL);
@@ -456,20 +442,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
-    /**
-     * It stores the quantity of medicines
-     */
-    int books_quantity;
 
-    /**
-     * Decreases the quantity of medicines
-     */
+    // It stores the quantity of books
+     int books_quantity;
+
+    //Decrease the quantity of books
     public void decrement(View view) {
         books_quantity = Integer.valueOf(mQuantityEditText.getText().toString());
         if (books_quantity == 0) {
             // Show an error message as a toast
             Toast.makeText(this, "Negative values are not accepted", Toast.LENGTH_SHORT).show();
-            // Exit this method early because there's nothing left to do
             return;
         }
         books_quantity = books_quantity - 1;
@@ -477,9 +459,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     }
 
-    /**
-     * Increases the quantity of medicines
-     */
+     // Increase the quantity of books
     public void increment(View view) {
         books_quantity = Integer.valueOf(mQuantityEditText.getText().toString());
         books_quantity = books_quantity + 1;

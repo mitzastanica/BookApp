@@ -57,14 +57,14 @@
 
                 <Button
                     android:id="@+id/decreaseButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_marginLeft="60dp"
+                    android:layout_width="@dimen/button_layout"
+                    android:layout_height="@dimen/button_layout"
+                    android:layout_marginLeft="@dimen/button_marginLeft"
                     android:onClick="decrement"
                     android:text="-"
-                    android:textSize="25sp" />
+                    android:textSize="@dimen/button_textSize" />
 
-                <!-- Quantity field -->
+
                 <EditText
                     android:id="@+id/edit_quantity"
                     android:layout_height="wrap_content"
@@ -72,17 +72,17 @@
                     android:gravity="center"
                     android:inputType="number"
                     android:text="1"
-                    android:textSize="25sp"
-                    android:layout_marginRight="30dp"
-                    android:layout_marginLeft="30dp"/>
+                    android:textSize="@dimen/button_textSize"
+                    android:layout_marginRight="@dimen/quantity_editText_margins"
+                    android:layout_marginLeft="@dimen/quantity_editText_margins"/>
 
                 <Button
                     android:id="@+id/increaseButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="@dimen/button_layout"
+                    android:layout_height="@dimen/button_layout"
                     android:onClick="increment"
                     android:text="+"
-                    android:textSize="25sp" />
+                    android:textSize="@dimen/button_textSize" />
             </LinearLayout>
         </LinearLayout>
 
@@ -157,7 +157,6 @@
                     style="@style/EditorFieldStyle"
                     android:hint="@string/hint_supplier_phone"
                     android:inputType="phone" />
-
 
             </LinearLayout>
             <ImageButton

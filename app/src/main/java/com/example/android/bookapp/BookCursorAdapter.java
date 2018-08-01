@@ -5,18 +5,15 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.android.bookapp.data.BookContract;
 
 public class BookCursorAdapter extends CursorAdapter {
@@ -46,8 +43,8 @@ public class BookCursorAdapter extends CursorAdapter {
     }
 
     /**
-     * This method binds the medicine data (in the current row pointed to by cursor) to the given
-     * list item layout. For example, the name for the current medicine can be set on the name TextView
+     * This method binds the book data (in the current row pointed to by cursor) to the given
+     * list item layout. For example, the name for the current book can be set on the name TextView
      * in the list item layout.
      *
      * @param view    Existing view, returned earlier by newView() method
@@ -57,31 +54,32 @@ public class BookCursorAdapter extends CursorAdapter {
      */
     @Override
     public void bindView(View view, final Context context, Cursor cursor) {
-        // Find individual views that we want to modify in the list item layout
-        TextView name = (TextView) view.findViewById(R.id.name);
-        TextView price = (TextView) view.findViewById(R.id.price);
-        final TextView quantityTextView = (TextView) view.findViewById(R.id.quantity);
-        RelativeLayout parentView = (RelativeLayout) view.findViewById(R.id.id_relative_layout);
+        // Find fields to populate in inflated template
+        TextView name = view.findViewById(R.id.name);
+        TextView price = view.findViewById(R.id.price);
+        final TextView quantityTextView = view.findViewById(R.id.quantity);
+        RelativeLayout parentView = view.findViewById(R.id.id_relative_layout);
 
-        // Find the columns of medicine attributes that we're interested in
+        // Find the columns of book attributes
         int idColumnIndex = cursor.getColumnIndex(BookContract.BookEntry._ID);
         int nameColumnIndex = cursor.getColumnIndex(BookContract.BookEntry.COLUMN_PRODUCT_NAME);
         int priceColumnIndex = cursor.getColumnIndex(BookContract.BookEntry.COLUMN_PRODUCT_PRICE);
         int quantityColumnIndex = cursor.getColumnIndex(BookContract.BookEntry.COLUMN_PRODUCT_QUANTITY);
 
-        // Read the medicine attributes from the Cursor for the current medicine
+        // Read the book attributes from the Cursor for the current book
         final int rowId = cursor.getInt(idColumnIndex);
         String bookName = cursor.getString(nameColumnIndex);
         double bookPrice = cursor.getDouble(priceColumnIndex);
         final int bookQuantity = cursor.getInt(quantityColumnIndex);
 
+        //Check the quantity attribute
         if (bookQuantity <= 1) {
             quantityTextView.setText(bookQuantity + " " + "unit");
         } else {
             quantityTextView.setText(bookQuantity + " " + "units");
         }
 
-        // Update the TextViews with the attributes for the current medicine
+        // Update the TextViews with the attributes for the current book
         name.setText(bookName);
         price.setText(String.valueOf(bookPrice));
 
@@ -92,7 +90,7 @@ public class BookCursorAdapter extends CursorAdapter {
                 // Open Detail activity
                 Intent intent = new Intent(context, EditorActivity.class);
 
-                // Form the content URI that represents clicked medicine.
+                // Form the content URI that represents clicked book.
                 Uri currentInventoryUri = ContentUris.withAppendedId(BookContract.BookEntry.CONTENT_URI, rowId);
 
                 // Set the URI on the data field of the intent
@@ -102,18 +100,16 @@ public class BookCursorAdapter extends CursorAdapter {
             }
         });
 
-
-        Button sellButton = (Button) view.findViewById(R.id.sell_button);
-        sellButton.setOnClickListener(new View.OnClickListener() {
+        //Find the button layout
+        Button saleButton = view.findViewById(R.id.sale_button);
+        saleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                // Get the Text
                 String text = quantityTextView.getText().toString();
-                // Split it
-                String[] splittedText = text.split(" ");
+                // Split the text
+                String[] splitText = text.split(" ");
                 // Take the first part
-                int quantity = Integer.parseInt(splittedText[0]);
+                int quantity = Integer.parseInt(splitText[0]);
 
                 if (quantity == 0) {
                     Toast.makeText(context, "No more in stock", Toast.LENGTH_SHORT).show();
@@ -130,7 +126,6 @@ public class BookCursorAdapter extends CursorAdapter {
                     int rowsAffected = context.getContentResolver().update(currentInventoryUri, values, null, null);
 
                     if (rowsAffected != 0) {
-                        /* update text view if database update is successful */
                         if (bookQuantity <= 1) {
                             quantityTextView.setText(quantity + " " + "unit");
                         } else {

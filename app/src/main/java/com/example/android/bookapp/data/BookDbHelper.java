@@ -16,7 +16,9 @@ public class BookDbHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
     }
-
+    /**
+     * This is called when the database is created for the first time.
+     */
     @Override
     public void onCreate(SQLiteDatabase database) {
 
@@ -31,7 +33,9 @@ public class BookDbHelper extends SQLiteOpenHelper {
         database.execSQL(SQL_CREATE_PRODUCT_TABLE);
 
     }
-
+    /**
+     * This is called when the database needs to be upgraded.
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop the Database
